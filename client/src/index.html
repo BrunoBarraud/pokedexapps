@@ -27,79 +27,65 @@
 
         <button class="next">Next Page</button>
     </main>
-
-    <script>
-        let page = 1;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const pokemonList = document.getElementById('pokemonList');
-            const newPokemonForm = document.getElementById('newPokemonForm');
-            const nextPageButton = document.querySelector('.next');
-            function renderPokemonList(pokemonList) {
-                pokemonList.forEach(pokemon => {
-                    const li = document.createElement('li');
-                    li.classList.add('flex', 'items-center', 'justify-between', 'border-b', 'border-gray-300', 'p-2');
-                    li.innerHTML = `
-                        <span class="text-lg w-1/3">${pokemon.id}</span>
-                        <span class="text-lg w-1/3 text-center">${pokemon.name}</span>
-                        <button class="text-lg w-1/3 text-right text-red-700 delete-button" data-id="${pokemon.id}">DELETE</button>
-                    `;
-                    pokemonList.appendChild(li);
-
-                    li.querySelector('.delete-button').addEventListener('click', async () => {
-                        try {
-                            const response = await fetch(`/api/pokemon/${pokemon.id}`, { method: 'DELETE' });
-                            if (response.ok) {
-                                loadPokemonPage(page); 
-                            } else {
-                                console.error(`Error deleting Pokémon: ${response.status}`);
-                            }
-                        } catch (error) {
-                            console.error('Error deleting Pokémon:', error);
-                        }
-                    });
-                });
-            }
-            async function loadPokemonPage(page) {
-                try {
-                    const response = await fetch(`/api/pokemon?page=${page}`);
-                    if (!response.ok) {
-                        throw new Error(`Error HTTP: ${response.status}`);
-                    }
-                    const data = await response.json();
-                    renderPokemonList(data.list);
-                } catch (error) {
-                    console.error('Error loading Pokémon:', error);
-                }
-            }
-            loadPokemonPage(page);
-            nextPageButton.addEventListener('click', () => {
-                page++;
-                loadPokemonPage(page);
-            });
-
-			//Esto es para agregar un pokemon
-            newPokemonForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                const formData = new FormData(newPokemonForm);
-
-                try {
-                    const response = await fetch('/api/pokemon', {
-                        method: 'POST',
-                        body: formData,
-                    });
-
-                    if (response.ok) {
-                        loadPokemonPage(page);
-                        newPokemonForm.reset();
-                    } else {
-                        console.error(`Error adding Pokémon: ${response.status}`);
-                    }
-                } catch (error) {
-                    console.error('Error adding Pokémon:', error);
-                }
-            });
-        });
-    </script>
 </body>
+<script>
+	function loadPokemons(pokemon) {
+		const ul = document.querySelector('ul');
+		const li = document.createElement('li');
+		li.classList.add('flex', 'items-center', 'justify-between', 'border-b', 'border-gray-300', 'p-2');
+		li.innerHTML = `
+			<span class="text-lg w-1/3">${pokemon.id}</span>
+			<span class="text-lg w-1/3 text-center">${pokemon.name}</span>
+			<button class="text-lg w-1/3 text-right text-red-700" onclick="deletePokemon(${pokemon.id})">DELETE</button>
+		`;
+		li.dataset.id = pokemon.id;
+		document.querySelector('ul').appendChild(li);
+	}
+	async function listPokemons(){
+		const response = await fetch('http://localhost:3000/api/pokemon.json');
+		const data = await response.json();
+		data.forEach(loadPokemons);
+	}
+	listPokemons();
+
+	document.querySelector('form').addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const form = event.target;
+		const data = new FormData(form);
+		const response = await fetch('http://localhost:3000/api/pokemon.json', {
+			method: 'POST',
+			body: data
+		});
+		const pokemon = await response.json();
+		loadPokemons(pokemon);
+		form.reset();
+	});
+
+	const form = document.querySelector('form')?.addEventListener('submit', async(e) => {e.preventDefault();
+		const id = e.target.id.value;
+		const data = new FormData(e.target);
+		fetch('http://localhost:3000/api/pokemon.json', {
+			method: 'POST',
+			body: JSON.stringify(pokemon),
+		})
+
+		document.querySelector('ul').addEventListener('click', async (e) => {
+			if (e.target.tagName === 'BUTTON') {
+				const id = e.target.parentElement.querySelector('span').textContent;
+				await fetch(`http://localhost:3000/api/pokemon/${id}.json`, {
+					method: 'DELETE'
+				});
+				if (response.ok) {
+					e.target.parentElement.remove();
+				}
+			}
+		});
+		document.querySelector('.next').addEventListener('click', async() => {
+			const response = await fetch('http://localhost:3000/api/pokemon.json?page=${++page}');
+			const data = await response.json();
+			document.querySelector('ul').innerHTML = '';
+			
+		})
+	});
+</script>
 </html>

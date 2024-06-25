@@ -35,8 +35,6 @@
             const pokemonList = document.getElementById('pokemonList');
             const newPokemonForm = document.getElementById('newPokemonForm');
             const nextPageButton = document.querySelector('.next');
-
-            // Función para renderizar la lista de Pokémon
             function renderPokemonList(pokemonList) {
                 pokemonList.forEach(pokemon => {
                     const li = document.createElement('li');
@@ -48,12 +46,11 @@
                     `;
                     pokemonList.appendChild(li);
 
-                    // Agregar evento para eliminar el Pokémon al hacer click en el botón "DELETE"
                     li.querySelector('.delete-button').addEventListener('click', async () => {
                         try {
                             const response = await fetch(`/api/pokemon/${pokemon.id}`, { method: 'DELETE' });
                             if (response.ok) {
-                                loadPokemonPage(page); // Recargar la lista después de eliminar
+                                loadPokemonPage(page); 
                             } else {
                                 console.error(`Error deleting Pokémon: ${response.status}`);
                             }
@@ -93,7 +90,7 @@
                     });
 
                     if (response.ok) {
-                        loadPokemonPage(page); //Recarga la pagina
+                        loadPokemonPage(page);
                         newPokemonForm.reset();
                     } else {
                         console.error(`Error adding Pokémon: ${response.status}`);
